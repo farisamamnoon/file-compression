@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 
-const sequelize = new Sequelize("file-sql", "faris", "faris", {
-  host: "localhost",
+const sequelize = new Sequelize(process.env.MYSQL_DATABASE, process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, {
+  host: process.env.MYSQL_HOST,
   dialect: "mysql",
 });
 
@@ -17,7 +17,7 @@ const Files = sequelize.define("Files", {
     allowNull: true,
   },
   status: {
-    type: DataTypes.CHAR("256"),
+    type: DataTypes.CHAR("200"),
     defaultValue: "Pending",
   },
   file: {

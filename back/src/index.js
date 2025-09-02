@@ -30,7 +30,7 @@ const zipFile = async (file, fileId) => {
   io.emit("finished", response.status);
 };
 
-app.post("/upload", upload.single("file"), async (req, res) => {
+app.post("/api/upload", upload.single("file"), async (req, res) => {
   const file = await Files.create({ title: req.body.title, file: req.file });
 
   zipFile(file.file, file.id);
@@ -39,7 +39,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   });
 });
 
-app.get("/", async (req, res) => {
+app.get("/api/", async (req, res) => {
   const files = await Files.findAll();
 
   res.json({
@@ -50,5 +50,5 @@ app.get("/", async (req, res) => {
 
 server.listen(3000, async () => {
   await Files.sync();
-  console.log("server running at http://localhost:3000");
+  console.log("Server running");
 });

@@ -12,7 +12,7 @@ function App() {
       const formData = new FormData();
       formData.append("file", file);
 
-      await fetch("http://localhost:3000/upload", {
+      await fetch("/api/upload/", {
         body: formData,
         method: "POST",
       });
@@ -23,16 +23,13 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch("http://localhost:3000/");
+      const res = await fetch("/api/");
       const data = await res.json();
 
       setFileData(data);
     };
 
-
-    function onFinishedEvent() {
-      
-    }
+    function onFinishedEvent() {}
 
     socket.on("finished", onFinishedEvent);
     fetchData();
@@ -42,12 +39,13 @@ function App() {
     <>
       <div>
         <ul>
-         {fileData.map((file) => 
-          <>
-            <h4>{file.title}</h4>
-            <p>{file.status}</p>
-          </>
-        )}
+          {fileData.length > 0 &&
+            fileData.map((file) => (
+              <>
+                <h4>{file.title}</h4>
+                <p>{file.status}</p>
+              </>
+            ))}
         </ul>
       </div>
       <br />
