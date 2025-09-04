@@ -1,8 +1,17 @@
 import { io } from "socket.io-client";
 
-const URL =
-  process.env.NODE_ENV === "production" ? undefined : "/api";
+const URL = "http://localhost:3000";
 
-export const socket = io(URL, {
+const socket = io(URL, {
   withCredentials: true,
 });
+
+socket.on("connect", () => {
+  console.log("Connected!");
+});
+
+socket.on("connect_error", (error) => {
+  console.error("Connection error:", error.message);
+});
+
+export default socket;

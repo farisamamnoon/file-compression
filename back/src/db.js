@@ -1,9 +1,14 @@
 const { Sequelize, DataTypes } = require("sequelize");
 
-const sequelize = new Sequelize(process.env.MYSQL_DATABASE, process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, {
-  host: process.env.MYSQL_HOST,
-  dialect: "mysql",
-});
+const sequelize = new Sequelize(
+  process.env.MYSQL_DATABASE,
+  process.env.MYSQL_USER,
+  process.env.MYSQL_PASSWORD,
+  {
+    host: process.env.MYSQL_HOST,
+    dialect: "mysql",
+  }
+);
 
 const Files = sequelize.define("Files", {
   // Model attributes are defined here
@@ -11,21 +16,24 @@ const Files = sequelize.define("Files", {
     type: DataTypes.UUID,
     allowNull: false,
     primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
   },
   title: {
     type: DataTypes.STRING,
-    allowNull: true,
+  },
+  size: {
+    type: DataTypes.BIGINT,
+    allowNull: false
   },
   status: {
     type: DataTypes.CHAR("200"),
     defaultValue: "Pending",
   },
-  file: {
-    type: DataTypes.BLOB("medium"),
-    // allowNull defaults to true
+  filePath: {
+    type: DataTypes.TEXT,
   },
-  zippedFile: {
-    type: DataTypes.BLOB("medium"),
+  zippedFilePath: {
+    type: DataTypes.TEXT,
   },
 });
 

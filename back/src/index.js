@@ -1,42 +1,57 @@
 const express = require("express");
-const multer = require("multer");
-const { gzip } = require("node-gzip");
-const { createServer } = require("node:http");
-const { join } = require("node:path");
+const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const { Files } = require("./db");
+const multer = require("multer");
 
-const upload = multer({ dest: "uploads/" });
+const { configDotenv } = require("dotenv");
+configDotenv();
+
+const { Files } = require("./db");
+const { zipFile, delay, storage } = require("./utils");
+
+const upload = multer({ storage: storage });
 
 const app = express();
-app.use(cors());
-const server = createServer(app);
+const server = http.createServer(app);
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "http://localhost:5173",
     credentials: true,
   },
 });
 
 io.on("connection", (socket) => {
-  console.log(socket.id);
+  console.log("Client connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
 });
 
-const zipFile = async (file, fileId) => {
-  const zippedFile = await gzip(file);
-
-  const response = await Files.create({ zippedFile, status: "Done" });
-  io.emit("finished", response.status);
-};
-
 app.post("/api/upload", upload.single("file"), async (req, res) => {
-  const file = await Files.create({ title: req.body.title, file: req.file });
+  const file = await Files.create({
+    title: req.file.originalname,
+    filePath: req.file.path,
+    size: req.file.size,
+  });
 
-  zipFile(file.file, file.id);
   res.json({
     status: 201,
   });
+
+  const [affectedRows] = await zipFile(req.file, file.id);
+  await delay(5000);
+  if (affectedRows > 0) {
+    io.emit("finished");
+  }
 });
 
 app.get("/api/", async (req, res) => {

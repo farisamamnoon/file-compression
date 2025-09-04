@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { socket } from "./socket";
+import socket from "./socket";
 
 function App() {
   const [file, setFile] = useState(null);
@@ -8,31 +8,32 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formSubmit = async () => {
-      const formData = new FormData();
-      formData.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
-      await fetch("/api/upload/", {
-        body: formData,
-        method: "POST",
-      });
-    };
+    await fetch("http://localhost:3000/api/upload/", {
+      body: formData,
+      method: "POST",
+    });
+    setFile(null);
+    fetchData();
+  };
 
-    formSubmit();
+  const fetchData = async () => {
+    const res = await fetch("http://localhost:3000/api/");
+    const data = await res.json();
+
+    setFileData(data.data);
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch("/api/");
-      const data = await res.json();
-
-      setFileData(data);
-    };
-
-    function onFinishedEvent() {}
-
-    socket.on("finished", onFinishedEvent);
     fetchData();
+
+    socket.on("finished", fetchData);
+
+    return () => {
+      socket.off("finished", fetchData);
+    };
   }, []);
 
   return (
@@ -40,11 +41,12 @@ function App() {
       <div>
         <ul>
           {fileData.length > 0 &&
-            fileData.map((file) => (
-              <>
-                <h4>{file.title}</h4>
-                <p>{file.status}</p>
-              </>
+            fileData.map((file, i) => (
+              <li key={`file-no-${i}`}>
+                <h4>File Name: {file.title}</h4>
+                <p>Status: {file.status}</p>
+                <p>File size: {file.size} Bytes</p>
+              </li>
             ))}
         </ul>
       </div>
